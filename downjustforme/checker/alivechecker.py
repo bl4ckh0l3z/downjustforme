@@ -26,6 +26,7 @@ import logging
 import urllib
 import threading
 from selenium import webdriver
+from selenium.webdriver.remote.remote_connection import LOGGER
 from utils.utils import Utils
 from socket import socket
 
@@ -37,23 +38,25 @@ class AliveChecker(threading.Thread):
         self._url = url
         self._thread_id = thread_id
         self.data = None
-        self.display = None
+        self.log = None
+        self.browser = webdriver.Firefox()
+        LOGGER.setLevel(logging.WARNING)
         threading.Thread.__init__(self)
 
     def run(self):
         logging.debug("Thread '%s' is checking if the host '%s' is alive..." % (self._thread_id, self._url))
-        browser = webdriver.Firefox()
-        self.data = self._check_status(browser, self._url)
-        browser.quit()
-        return self.data
+        #browser = webdriver.Firefox()
+        self.data = self._check_status(self.browser, self._url)
+        #browser.quit()
+        return self.data, self.log
 
     def _check_status(self, browser, url):
-        #logging.debug("Checking '%s'" % (url))
+        self.log = "Checking '%s'\n" % (url)
         data = dict()
         checks = []
         i = 1
         for i in range(1, self._cfg['fails_count']+1):
-            #logging.debug('Check #%s' % (str(i)))
+            self.log += 'Check #%s\n' % (str(i))
             check = dict()
             check['time_start'] = time.time()
 
@@ -66,7 +69,7 @@ class AliveChecker(threading.Thread):
 
             check['time_end'] = time.time()
             check['time_elapsed'] = (check['time_end']-check['time_start'])/60
-            #logging.debug('Elapsed: %s' % (str(check['time_elapsed'])))
+            self.log += 'Elapsed: %s\n' % (str(check['time_elapsed']))
             checks.append(check)
             i += 1
             time.sleep(self._cfg['check_frequency'])
@@ -84,22 +87,22 @@ class AliveChecker(threading.Thread):
             sock = socket()
             sock.connect((host[cpos+3:], port))
             sock.close
-            #logging.debug('Testing TCP --> ok')
+            self.log += 'Testing TCP --> ok\n'
             status_code = 'ok'
             return status_code
         except:
-            logging.debug('Testing TCP --> fails')
+            self.log += 'Testing TCP --> fails\n'
             return status_code
 
     def _check_http(self, proxy, user_agent, url):
-        status_code = ''
+        status_code = 0
         try:
             response = urllib.urlopen(url)
             status_code = response.getcode()
-            #logging.debug('Testing HTTP --> %s' % (str(status_code)))
+            self.log += 'Testing HTTP --> %s\n' % (str(status_code))
             return status_code
         except:
-            logging.debug('Testing HTTP --> %s' % (str(status_code)))
+            self.log += 'Testing HTTP --> %s\n' % (str(status_code))
             return status_code
 
     def _check_keywords(self, browser, proxy, user_agent, url):
@@ -111,21 +114,21 @@ class AliveChecker(threading.Thread):
             page = browser.page_source.encode('ascii', 'ignore').lower()
 
             if current_url != url:
-                #logging.debug("'%s' redirects to '%s'" % (url, current_url))
-                self._check_keywords(browser, proxy, user_agent, current_url)
+                self.log += "'%s' redirects to '%s'\n" % (url, current_url)
+                return self._check_keywords(browser, proxy, user_agent, current_url)
             else:
                 for keyword in self._cfg['keywords_to_check']:
                     if str(keyword) in str(page):
                         is_keywords = True
-                        #logging.debug("found keyword: '%s'" % (keyword))
+                        self.log += "found keyword: '%s'\n" % (keyword)
               
                 if is_keywords:
-                    #logging.debug('Testing KEYWORDS --> ok')
+                    self.log += 'Testing KEYWORDS --> ok\n'
                     status_code = 'ok'
                 else:
-                    #logging.debug('Testing KEYWORDS --> fails')
+                    self.log += 'Testing KEYWORDS --> fails\n'
                     status_code = 'fails'
             return status_code
         except:
-            logging.debug('Testing KEYWORDS --> fails')
+            self.log += 'Testing KEYWORDS --> fails\n'
             return status_code

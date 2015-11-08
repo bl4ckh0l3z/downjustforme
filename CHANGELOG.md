@@ -1,6 +1,21 @@
 # DownJustForMe - Changelog
 
 
+## 1.4 (Nov 08, 2015)
+
+###Features
+
+  - Added logrotate installation and config 
+
+
+## 1.3 (Nov 06, 2015)
+
+###Fixes
+
+  - Fixed checks on http redirections 
+  - Fixed logging for each thread
+
+
 ## 1.2 (Sep 14, 2015)
 
 ###Features

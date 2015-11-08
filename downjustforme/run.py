@@ -87,6 +87,8 @@ class Core:
 
             for thread in threads:
                 data_new.append(thread.data)
+                logging.debug('%s\n' % (thread.log))
+                thread.browser.quit()
 
             if len(data_new) > 0:
                 JSONAdapter.save(data_new, self._cfg['dir_in'], self._cfg['serial_file'])
