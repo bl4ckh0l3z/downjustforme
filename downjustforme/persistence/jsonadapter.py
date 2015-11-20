@@ -50,7 +50,7 @@ class JSONAdapter():
         logging.debug("JSONAdapter is storing new data '%s'" % (file_name))
         try:
             file = open(os.path.join(path, file_name), 'w')
-            file.write(json.dumps(data, encoding='utf-8'))
+            file.write(json.dumps(data, indent=4, encoding='utf-8'))
             file.close()
         except OSError, e:
             logging.error("Error saving new data from json file: %s" % (e))

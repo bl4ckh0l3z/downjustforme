@@ -29,9 +29,13 @@ from utils.utils import Utils
 
 class Evaluator():
 
-    def __init__(self, config):
+    def __init__(self, config, is_check_tcp, is_check_http, is_check_keywords, is_check_bandwidth):
         logging.debug("Instantiating the '%s' class" % (self.__class__.__name__))
         self._cfg = config
+        self._is_check_tcp = is_check_tcp
+        self._is_check_http = is_check_http
+        self._is_check_keywords = is_check_keywords
+        self._is_check_bandwidth = is_check_bandwidth
 
     def run(self, data):
         logging.debug("Merging the availability indicators of the web-sites...")
@@ -87,10 +91,15 @@ class Evaluator():
                 keywords_check_2 = ((data[d])['status_code_keywords'])[key_list[1]]
                 time_elapsed_check_2 = ((data[d])['time_elapsed'])[key_list[1]]
 
-            tcp_changed, tcp_state = self._evaluate_tcp_availability(tcp_check_1, tcp_check_2)
-            http_changed, http_state = self._evaluate_http_availability(http_check_1, http_check_2)
-            keywords_changed, keywords_state = self._evaluate_keywords_availability(keywords_check_1, keywords_check_2)
-            bandwidth_changed, bandwidth_state = self._evaluate_bandwidth_availability(time_elapsed_check_1, time_elapsed_check_2)
+            tcp_changed = http_changed = keywords_changed = bandwidth_changed = False
+            if self._is_check_tcp == True:
+                tcp_changed, tcp_state = self._evaluate_tcp_availability(tcp_check_1, tcp_check_2)
+            if self._is_check_http == True:
+                http_changed, http_state = self._evaluate_http_availability(http_check_1, http_check_2)
+            if self._is_check_keywords == True:
+                keywords_changed, keywords_state = self._evaluate_keywords_availability(keywords_check_1, keywords_check_2)
+            if self._is_check_bandwidth == True:
+                bandwidth_changed, bandwidth_state = self._evaluate_bandwidth_availability(time_elapsed_check_1, time_elapsed_check_2)
 
             if tcp_changed or http_changed or keywords_changed or bandwidth_changed:
                 state += ' %s </br> ****************************************************************** </br> %s </br> %s </br> %s </br> %s </br> ****************************************************************** </br>' % (d, tcp_state, http_state, keywords_state, bandwidth_state)

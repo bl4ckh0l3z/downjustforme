@@ -23,7 +23,7 @@ __email__ = 'bl4ckh0l3z@gmail.com'
 
 import time
 import logging
-import urllib
+import urllib2
 import threading
 from selenium import webdriver
 from selenium.webdriver.remote.remote_connection import LOGGER
@@ -69,6 +69,7 @@ class AliveChecker(threading.Thread):
 
             check['time_end'] = time.time()
             check['time_elapsed'] = (check['time_end']-check['time_start'])/60
+
             self.log += 'Elapsed: %s\n' % (str(check['time_elapsed']))
             checks.append(check)
             i += 1
@@ -85,6 +86,7 @@ class AliveChecker(threading.Thread):
         host = Utils.extract_domain(url)
         try:
             sock = socket()
+            sock.settimeout(self._cfg['time_out_sec'])
             sock.connect((host[cpos+3:], port))
             sock.close
             self.log += 'Testing TCP --> ok\n'
@@ -97,7 +99,7 @@ class AliveChecker(threading.Thread):
     def _check_http(self, proxy, user_agent, url):
         status_code = 0
         try:
-            response = urllib.urlopen(url)
+            response = urllib2.urlopen(url, timeout=self._cfg['time_out_sec'])
             status_code = response.getcode()
             self.log += 'Testing HTTP --> %s\n' % (str(status_code))
             return status_code
@@ -109,6 +111,7 @@ class AliveChecker(threading.Thread):
         status_code = 'fails'
         is_keywords = False
         try:
+            browser.set_page_load_timeout(self._cfg['time_out_sec'])
             browser.get(url)
             current_url = browser.current_url
             page = browser.page_source.encode('ascii', 'ignore').lower()

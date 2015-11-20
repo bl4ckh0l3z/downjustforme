@@ -42,6 +42,7 @@ class ConfigReader():
                         not config.has_option('DownJustForMe', 'keywords_to_check') and \
                         not config.has_option('DownJustForMe', 'fails_count') and \
                         not config.has_option('DownJustForMe', 'check_frequency') and \
+                        not config.has_option('DownJustForMe', 'time_out_sec') and \
                         not config.has_option('DownJustForMe', 'bandwidth_avail_factor') and \
                         not config.has_option('DownJustForMe', 'serial_file')):
             print("\n### ERROR ### Config element are not defined in the config file\n")
@@ -96,6 +97,13 @@ class ConfigReader():
                 logging.debug("Setting '%s' as fails count number" % (cfg['fails_count']))
             else:
                 logging.debug("Fails count number is not defined")
+
+            ### parse time out in seconds for http requests
+            if config.has_option('DownJustForMe', 'time_out_sec'):
+                cfg['time_out_sec'] = float(config.get('DownJustForMe', 'time_out_sec'))
+                logging.debug("Setting '%s's as time out for http requests" % (cfg['time_out_sec']))
+            else:
+                logging.debug("Time out for http requests is not defined")
 
             ### parse proxy config
             if config.has_option('DownJustForMe', 'proxy'):

@@ -104,7 +104,7 @@ This is an example of the additional data reported by email:
 
 ``$ sudo chmod 700 run_downjustforme.sh``  
 ``$ run_downjustforme.sh -h``  
-``$ run_downjustforme.sh -e``
+``$ run_downjustforme.sh -t -p -k -b -e``
 
 
 ## Package composition

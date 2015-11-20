@@ -1,6 +1,20 @@
 # DownJustForMe - Changelog
 
 
+## 1.6 (Nov 20, 2015)
+
+###Fixes
+
+  - Added appropriate flags for partial checks at tcp (-t), http (-p), keywords (-k) or bandwidth (-b) level
+
+
+## 1.5 (Nov 14, 2015)
+
+###Fixes
+
+  - Added timeout (in seconds) for http requests made by blocking calls of the the modules socket, urllib and webdriver.Firefox 
+
+
 ## 1.4 (Nov 08, 2015)
 
 ###Features

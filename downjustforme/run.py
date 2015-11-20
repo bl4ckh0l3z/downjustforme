@@ -37,17 +37,21 @@ from utils.utils import Utils
 
 class Core:
 
-    def __init__(self, emailnotifiers):
+    def __init__(self, emailnotifiers, is_check_tcp, is_check_http, is_check_keywords, is_check_bandwidth):
         logging.debug("Instantiating the '%s' class" % (self.__class__.__name__))
 
         self._emailnotifiers = emailnotifiers
+        self._is_check_tcp = is_check_tcp
+        self._is_check_http = is_check_http
+        self._is_check_keywords = is_check_keywords
+        self._is_check_bandwidth = is_check_bandwidth
 
         check_passed = CheckDependencies.run()
         if not check_passed:
             exit()
         else:
             self._cfg = ConfigReader.run()
-            self._evaluator = Evaluator(self._cfg)
+            self._evaluator = Evaluator(self._cfg, self._is_check_tcp, self._is_check_http, self._is_check_keywords, self._is_check_bandwidth)
             JSONAdapter.config = self._cfg
             if self._emailnotifiers:
                 EmailNotifiers.config = self._cfg
@@ -116,29 +120,53 @@ def usage():
     print "\nThis is the usage function\n"
     print 'Usage: ./run_downjustforme.sh [options]'
     print '\n-h Show this help'
+    print '-t Check TCP'
+    print '-p Check HTTP'
+    print '-k Check Keywords'
+    print '-b Check Bandwidth'
     print '-e Send the results by email'
-    print '\nDefault ./run_downjustforme.sh\n'
+    print '\nDefault ./run_downjustforme.sh -t -p -k -b\n'
 
 def options():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h:e", ["help", "Email"])
+        opts, args = getopt.getopt(sys.argv[1:], "hetpkb", ["help", "Email", "TCP", "HTTP", "Keywords", "Bandwidth"])
     except getopt.GetoptError as err:
         print str(err)
         usage()
         sys.exit(2)
     emailnotifiers = False
+    is_check_tcp = True
+    is_check_http = True
+    is_check_keywords = True
+    is_check_bandwidth = True
+    is_first = True
     for o, a in opts:
+        if (o in ("-t", "--tcp") or o in ("-p", "--http") or o in ("-b", "--bandwidth") or o in ("-k", "--keywords")) and is_first == True:
+            is_first = False
+            is_check_tcp = False
+            is_check_http = False
+            is_check_keywords = False
+            is_check_bandwidth = False
+
         if o in ("-h", "--help"):
             usage()
             sys.exit()
         elif o in ("-e", "--email"):
             emailnotifiers = True
+        elif o in ("-t", "--tcp"):
+            is_check_tcp = True
+        elif o in ("-p", "--http"):
+            is_check_http = True
+        elif o in ("-k", "--keywords"):
+            is_check_keywords = True
+        elif o in ("-b", "--bandwidth"):
+            is_check_bandwidth = True
         else:
             assert False, "Unhandled option"
-    return emailnotifiers
+    return emailnotifiers, is_check_tcp, is_check_http, is_check_keywords, is_check_bandwidth
 
 def main():
-    emailnotifiers = options()
+    emailnotifiers, is_check_tcp, is_check_http, is_check_keywords, is_check_bandwidth = options()
     log_file = './logs/downjustforme.log'
     logging.basicConfig(filename=log_file,
                         level=logging.DEBUG,
@@ -149,7 +177,7 @@ def main():
     logging.debug('######################################')
     logging.debug('#####   Starting DownJustForMe   #####')
     logging.debug('######################################')
-    core = Core(emailnotifiers)
+    core = Core(emailnotifiers, is_check_tcp, is_check_http, is_check_keywords, is_check_bandwidth)
     core.run()
 
 if __name__ == "__main__":
