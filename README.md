@@ -97,7 +97,7 @@ This is an example of the additional data reported by email:
 ## Configuration and Installation
 
 ``$ sudo chmod 700 configure.sh``  
-``$ configure.sh``
+``$ sudo configure.sh``
 
 
 ## Running
