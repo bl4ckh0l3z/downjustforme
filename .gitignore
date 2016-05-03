@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 
+.idea
+
 # C extensions
 *.so
 
@@ -47,7 +49,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
+#*.log
 
 # Sphinx documentation
 docs/_build/

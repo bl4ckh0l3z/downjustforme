@@ -27,4 +27,4 @@ fi
 
 python -c "from downjustforme.dependencies.checkdependencies import CheckDependencies; check_dependecies = CheckDependencies(); check_dependecies.run()"
 
-echo "done"
+echo "Done"
